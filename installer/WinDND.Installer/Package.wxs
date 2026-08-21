@@ -1,0 +1,69 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Package
+        Name="WinDND"
+        Manufacturer="Nuvqe"
+        Version="$(var.MsiVersion)"
+        UpgradeCode="7E3B73D1-97F1-4C0E-986A-B7E5B6D39C3A"
+        Scope="perMachine"
+        Language="1033"
+        InstallerVersion="500">
+
+        <SummaryInformation Description="Windows Do Not Disturb scheduler" Manufacturer="Nuvqe" />
+        <MajorUpgrade DowngradeErrorMessage="A newer version of WinDND is already installed." />
+        <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+        <Icon Id="WinDNDIcon.ico" SourceFile="$(var.AppIconPath)" />
+        <Property Id="ARPPRODUCTICON" Value="WinDNDIcon.ico" />
+
+        <StandardDirectory Id="ProgramFiles6432Folder">
+            <Directory Id="INSTALLFOLDER" Name="WinDND" />
+        </StandardDirectory>
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="WinDNDProgramMenuFolder" Name="WinDND" />
+        </StandardDirectory>
+
+        <Component Id="ApplicationFiles" Directory="INSTALLFOLDER" Guid="*">
+            <File Id="WinDNDExe" Source="$(var.PublishDirectory)WinDND.exe" KeyPath="yes">
+                <Shortcut
+                    Id="StartMenuShortcut"
+                    Directory="WinDNDProgramMenuFolder"
+                    Name="WinDND"
+                    Description="Windows Do Not Disturb scheduler"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="WinDNDIcon.ico"
+                    IconIndex="0"
+                    Advertise="yes" />
+            </File>
+            <File Id="LicenseFile" Source="$(var.LicensePath)" Name="LICENSE.txt" />
+            <File Id="NoticeFile" Source="$(var.NoticePath)" Name="NOTICE.txt" />
+            <File Id="ThirdPartyNoticesFile" Source="$(var.ThirdPartyNoticesPath)" Name="THIRD-PARTY-NOTICES.txt" />
+            <RemoveFolder Id="RemoveProgramMenuDirectory" Directory="WinDNDProgramMenuFolder" On="uninstall" />
+        </Component>
+
+        <Component Id="AutoStart" Directory="INSTALLFOLDER" Guid="*">
+            <RegistryValue
+                Root="HKLM"
+                Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                Name="WinDND"
+                Value="&quot;[INSTALLFOLDER]WinDND.exe&quot;"
+                Type="string"
+                KeyPath="yes" />
+        </Component>
+
+        <Component Id="EventLogSource" Directory="INSTALLFOLDER" Guid="*">
+            <RegistryKey Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\EventLog\Application\WinDND">
+                <RegistryValue
+                    Name="EventMessageFile"
+                    Value="%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\EventLogMessages.dll"
+                    Type="expandable"
+                    KeyPath="yes" />
+                <RegistryValue Name="TypesSupported" Value="7" Type="integer" />
+            </RegistryKey>
+        </Component>
+
+        <Feature Id="MainFeature" Title="WinDND" Level="1">
+            <ComponentRef Id="ApplicationFiles" />
+            <ComponentRef Id="AutoStart" />
+            <ComponentRef Id="EventLogSource" />
+        </Feature>
+    </Package>
+</Wix>

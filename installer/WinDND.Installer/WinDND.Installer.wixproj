@@ -1,0 +1,24 @@
+<Project Sdk="WixToolset.Sdk/7.0.0">
+  <PropertyGroup>
+    <AcceptEula>wix7</AcceptEula>
+    <Platform>x64</Platform>
+    <ArtifactVersion Condition="'$(ArtifactVersion)' == ''">0.0.0-no-g</ArtifactVersion>
+    <MsiVersion Condition="'$(MsiVersion)' == ''">0.0.1</MsiVersion>
+    <OutputName>WinDND-$(ArtifactVersion)-x64</OutputName>
+    <OutputType>Package</OutputType>
+    <PublishDirectory>$(MSBuildProjectDirectory)\..\..\artifacts\publish\WinDND\</PublishDirectory>
+    <AppIconPath>$(MSBuildProjectDirectory)\..\..\src\WinDND.App\Assets\WinDND.ico</AppIconPath>
+    <LicensePath>$(MSBuildProjectDirectory)\..\..\LICENSE</LicensePath>
+    <NoticePath>$(MSBuildProjectDirectory)\..\..\NOTICE</NoticePath>
+    <ThirdPartyNoticesPath>$(MSBuildProjectDirectory)\..\..\THIRD-PARTY-NOTICES.txt</ThirdPartyNoticesPath>
+    <DefineConstants>PublishDirectory=$(PublishDirectory);MsiVersion=$(MsiVersion);AppIconPath=$(AppIconPath);LicensePath=$(LicensePath);NoticePath=$(NoticePath);ThirdPartyNoticesPath=$(ThirdPartyNoticesPath)</DefineConstants>
+    <BaseOutputPath>$(MSBuildProjectDirectory)\..\..\artifacts\installer\</BaseOutputPath>
+  </PropertyGroup>
+
+  <Target Name="PublishWinDND" BeforeTargets="CoreCompile">
+    <MSBuild
+      Projects="$(MSBuildProjectDirectory)\..\..\src\WinDND.App\WinDND.App.csproj"
+      Targets="Publish"
+      Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=true;PublishSingleFile=true;PublishDir=$(PublishDirectory);Version=$(ArtifactVersion);InformationalVersion=$(ArtifactVersion);IncludeSourceRevisionInInformationalVersion=false" />
+  </Target>
+</Project>

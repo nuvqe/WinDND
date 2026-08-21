@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "CronExpressionDescriptor": {
+        "type": "Direct",
+        "requested": "[2.51.0, )",
+        "resolved": "2.51.0",
+        "contentHash": "HL9DICwTMJBbGcQSQxDp0WmsrH5YOPWFRnAcGXnsFwKOy+7lHcXLQLU4urSNrVkIhySdtmdk4utsWmZ6FJ6flA=="
+      },
+      "Cronos": {
+        "type": "Direct",
+        "requested": "[0.13.0, )",
+        "resolved": "0.13.0",
+        "contentHash": "Nkve+Yi0+ol3ntSBRHeW0ka9cJQ8vndSUvvkXqF9LVqwpoqWueyxu/HS275r98RDOmF7/mzRnZW5XXUBXob+TA=="
+      }
+    }
+  }
+}

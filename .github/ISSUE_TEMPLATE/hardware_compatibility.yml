@@ -1,0 +1,65 @@
+name: Hardware compatibility report
+description: Report results from testing a two-button USB controller.
+title: "[Hardware]: "
+labels: [hardware]
+body:
+  - type: markdown
+    attributes:
+      value: Complete the hardware validation checklist in `docs/hardware-validation.md` before submitting this report.
+  - type: input
+    id: device
+    attributes:
+      label: Device make and model
+      placeholder: Example: SayoDevice O2C
+    validations:
+      required: true
+  - type: input
+    id: identifier
+    attributes:
+      label: Windows hardware identifier
+      description: Include VID and PID, but remove any serial number.
+      placeholder: VID_8089&PID_0002
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: WinDND version
+      placeholder: Example: 26.821.1816-g0d307118e9
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Example: Windows 11 24H2
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Overall result
+      options:
+        - Fully working
+        - Partially working
+        - Not detected
+    validations:
+      required: true
+  - type: checkboxes
+    id: features
+    attributes:
+      label: Working features
+      options:
+        - label: Automatic F13/F14 programming
+        - label: Left-button action
+        - label: Right-button action
+        - label: Left RGB indicator
+        - label: Right RGB indicator
+        - label: Sleep/resume and reconnect
+  - type: textarea
+    id: details
+    attributes:
+      label: Details and sanitized logs
+      description: Describe failures precisely and remove personal or sensitive information from logs.
+    validations:
+      required: true

@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/WinDND.Core/WinDND.Core.csproj" />
+  <Project Path="src/WinDND.App/WinDND.App.csproj" />
+  <Project Path="tests/WinDND.Core.Tests/WinDND.Core.Tests.csproj" />
+  <Project Path="tools/WinDND.IconGenerator/WinDND.IconGenerator.csproj" />
+  <Project Path="tools/WinDND.UiSnapshot/WinDND.UiSnapshot.csproj" />
+  <Project Path="installer/WinDND.Installer/WinDND.Installer.wixproj" />
+</Solution>

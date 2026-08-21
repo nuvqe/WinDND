@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0-windows10.0.17763": {
+      "CronExpressionDescriptor": {
+        "type": "Transitive",
+        "resolved": "2.51.0",
+        "contentHash": "HL9DICwTMJBbGcQSQxDp0WmsrH5YOPWFRnAcGXnsFwKOy+7lHcXLQLU4urSNrVkIhySdtmdk4utsWmZ6FJ6flA=="
+      },
+      "Cronos": {
+        "type": "Transitive",
+        "resolved": "0.13.0",
+        "contentHash": "Nkve+Yi0+ol3ntSBRHeW0ka9cJQ8vndSUvvkXqF9LVqwpoqWueyxu/HS275r98RDOmF7/mzRnZW5XXUBXob+TA=="
+      },
+      "HidSharp": {
+        "type": "Transitive",
+        "resolved": "2.6.4",
+        "contentHash": "UcGvtnXFcatwHBXr+ei8GEXvg//wjGmDGQ6Xvb+7M4vHjURAhSLIJ+dSZv0BnAhQEpNlH8G4P7JxYnMH8Aph4g=="
+      },
+      "WinDND": {
+        "type": "Project",
+        "dependencies": {
+          "HidSharp": "[2.6.4, )",
+          "WinDND.Core": "[1.0.0, )"
+        }
+      },
+      "windnd.core": {
+        "type": "Project",
+        "dependencies": {
+          "CronExpressionDescriptor": "[2.51.0, )",
+          "Cronos": "[0.13.0, )"
+        }
+      }
+    },
+    "net10.0-windows10.0.17763/win-x64": {}
+  }
+}

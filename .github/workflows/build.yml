@@ -1,0 +1,99 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  installer:
+    name: Test and build WiX installer
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - name: Build and test
+        shell: pwsh
+        run: .\build.ps1
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: windnd-installer-${{ github.sha }}
+          path: |
+            artifacts/installer/x64/Release/*.msi
+            artifacts/installer/x64/Release/versions-windnd.yaml
+            artifacts/installer/x64/Release/LICENSE
+            artifacts/installer/x64/Release/NOTICE
+            artifacts/installer/x64/Release/THIRD-PARTY-NOTICES.txt
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create $env:GITHUB_REF_NAME
+          artifacts/installer/x64/Release/*.msi
+          artifacts/installer/x64/Release/versions-windnd.yaml
+          artifacts/installer/x64/Release/LICENSE
+          artifacts/installer/x64/Release/NOTICE
+          artifacts/installer/x64/Release/THIRD-PARTY-NOTICES.txt
+          --verify-tag
+          --generate-notes
+          --title "WinDND $env:GITHUB_REF_NAME"
+
+      - name: Publish release for main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $metadataPath = "artifacts/installer/x64/Release/versions-windnd.yaml"
+          $versionLine = Select-String -LiteralPath $metadataPath -Pattern '^\s*version:\s*(\S+)\s*$' |
+            Select-Object -First 1
+
+          if ($null -eq $versionLine) {
+            throw "Could not read the WinDND version from [$metadataPath]."
+          }
+
+          $version = $versionLine.Matches[0].Groups[1].Value
+          $tag = "v$version"
+
+          gh release create $tag `
+            artifacts/installer/x64/Release/*.msi `
+            $metadataPath `
+            artifacts/installer/x64/Release/LICENSE `
+            artifacts/installer/x64/Release/NOTICE `
+            artifacts/installer/x64/Release/THIRD-PARTY-NOTICES.txt `
+            --target $env:GITHUB_SHA `
+            --generate-notes `
+            --latest `
+            --title "WinDND $version"
