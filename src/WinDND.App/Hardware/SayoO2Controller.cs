@@ -1,5 +1,6 @@
 using System.Globalization;
 using HidSharp;
+using HidSharp.Reports;
 using WinDND.Core.Models;
 using WinDND.Infrastructure;
 
@@ -9,6 +10,12 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
 {
     private const int LeftLed = 0;
     private const int RightLed = 1;
+    private const byte InitializeCommand = 0x00;
+    private const byte SaveCommand = 0x04;
+    private const byte LegacyKeysCommand = 0x06;
+    private const byte LegacyLightingCommand = 0x07;
+    private const byte LightingV2Command = 0x10;
+    private const uint SayoControlUsage = 0xFF000001;
     private const byte F13Usage = 0x68;
     private const byte F14Usage = 0x69;
     private readonly IAppLogger _logger = logger;
@@ -21,11 +28,12 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
     private bool _keysConfigured;
     private bool _unavailableLogged;
     private bool _errorLogged;
+    private string? _deviceName;
 
     public bool IsConnected => _devicePath is not null;
 
     public string Status => IsConnected
-        ? "Compatible SayoDevice connected."
+        ? $"{_deviceName ?? "Compatible SayoDevice"} connected."
         : "No compatible SayoDevice detected.";
 
     public void Update(
@@ -60,6 +68,11 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
             return;
         }
 
+        if (DateTime.UtcNow < _nextDiscoveryUtc)
+        {
+            return;
+        }
+
         HidDevice? device = FindDevice(settings);
         if (device is null)
         {
@@ -67,6 +80,7 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
             _keysConfigured = false;
             _lastLeftColor = null;
             _lastRightColor = null;
+            _deviceName = null;
             if (!_unavailableLogged)
             {
                 _logger.Information(
@@ -91,15 +105,25 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
             using HidStream stream = device.Open();
             stream.ReadTimeout = 750;
             stream.WriteTimeout = 750;
-            Initialize(stream, device);
+            DeviceCapabilities capabilities = Initialize(stream, device);
 
             if (settings.ConfigureKeys && !_keysConfigured)
             {
+                if (!capabilities.Supports(LegacyKeysCommand))
+                {
+                    throw new IOException("This SayoDevice firmware does not support legacy F13/F14 key programming.");
+                }
+
                 bool changed = ConfigureKey(stream, device, 0, F13Usage);
                 changed |= ConfigureKey(stream, device, 1, F14Usage);
                 if (changed)
                 {
-                    SendCommand(stream, device, 4, [0x72, 0x96]);
+                    if (!capabilities.Supports(SaveCommand))
+                    {
+                        throw new IOException("This SayoDevice firmware cannot save the F13/F14 key assignments.");
+                    }
+
+                    SendCommand(stream, device, SaveCommand, [0x72, 0x96]);
                     _logger.Information("SayoDevice buttons were configured as F13 and F14.", 1502);
                 }
 
@@ -108,13 +132,13 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
 
             if (force || _lastLeftColor != leftColor)
             {
-                SetStaticColor(stream, device, LeftLed, leftColor);
+                SetStaticColor(stream, device, capabilities, LeftLed, leftColor);
                 _lastLeftColor = leftColor;
             }
 
             if (force || _lastRightColor != rightColor)
             {
-                SetStaticColor(stream, device, RightLed, rightColor);
+                SetStaticColor(stream, device, capabilities, RightLed, rightColor);
                 _lastRightColor = rightColor;
             }
 
@@ -126,6 +150,7 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
             }
 
             _devicePath = device.DevicePath;
+            _deviceName = $"SayoDevice (PID {device.ProductID:X4})";
             _nextHealthCheckUtc = DateTime.UtcNow.AddSeconds(5);
             _unavailableLogged = false;
             _errorLogged = false;
@@ -133,6 +158,7 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or TimeoutException)
         {
             _devicePath = null;
+            _deviceName = null;
             _lastLeftColor = null;
             _lastRightColor = null;
             _nextDiscoveryUtc = DateTime.UtcNow.AddSeconds(5);
@@ -146,41 +172,50 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
 
     private HidDevice? FindDevice(HardwareControllerSettings settings)
     {
-        if (DateTime.UtcNow < _nextDiscoveryUtc)
-        {
-            return null;
-        }
-
         HidDevice? device = DeviceList.Local
             .GetHidDevices(settings.VendorId)
             .Where(candidate => settings.ProductIds.Count == 0 || settings.ProductIds.Contains(candidate.ProductID))
-            .FirstOrDefault(candidate =>
-            {
-                try
-                {
-                    return candidate.GetMaxInputReportLength() >= 64 && candidate.GetMaxOutputReportLength() >= 64;
-                }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                {
-                    return false;
-                }
-            });
+            .FirstOrDefault(IsSayoControlInterface);
 
         _nextDiscoveryUtc = device is null ? DateTime.UtcNow.AddSeconds(5) : DateTime.MinValue;
         return device;
     }
 
-    private static void Initialize(HidStream stream, HidDevice device)
+    private static bool IsSayoControlInterface(HidDevice candidate)
+    {
+        try
+        {
+            ReportDescriptor descriptor = candidate.GetReportDescriptor();
+            bool hasControlUsage = descriptor.DeviceItems.Any(item =>
+                item.Usages.ContainsValue(SayoControlUsage));
+            bool hasInputReport = descriptor.InputReports.Any(report =>
+                report.ReportID == 2 && report.Length >= 64);
+            bool hasOutputReport = descriptor.OutputReports.Any(report =>
+                report.ReportID == 2 && report.Length >= 64);
+            return hasControlUsage && hasInputReport && hasOutputReport;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return false;
+        }
+    }
+
+    private static DeviceCapabilities Initialize(HidStream stream, HidDevice device)
     {
         DateTime now = DateTime.Now;
-        SendCommand(stream, device, 0, [(byte)now.Day, (byte)now.Hour, (byte)now.Minute, (byte)now.Second]);
+        byte[] response = SendCommand(
+            stream,
+            device,
+            InitializeCommand,
+            [(byte)now.Day, (byte)now.Hour, (byte)now.Minute, (byte)now.Second]);
+        return DeviceCapabilities.FromInitializeResponse(response);
     }
 
     private static bool ConfigureKey(HidStream stream, HidDevice device, byte keyNumber, byte keyUsage)
     {
         try
         {
-            byte[] response = SendCommand(stream, device, 6, [0, keyNumber]);
+            byte[] response = SendCommand(stream, device, LegacyKeysCommand, [0, keyNumber]);
             if (response.Length > 8 && response[5] == 1 && response[7] == 0 && response[8] == keyUsage)
             {
                 return false;
@@ -193,15 +228,42 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
 
         // Legacy O2/O2C key command: pattern, key number, keyboard mode, reserved,
         // modifier, and up to three HID keyboard usages.
-        SendCommand(stream, device, 6, [1, keyNumber, 1, 0, 0, keyUsage, 0, 0]);
+        SendCommand(stream, device, LegacyKeysCommand, [1, keyNumber, 1, 0, 0, keyUsage, 0, 0]);
         return true;
     }
 
-    private static void SetStaticColor(HidStream stream, HidDevice device, byte ledNumber, Color color)
+    private static void SetStaticColor(
+        HidStream stream,
+        HidDevice device,
+        DeviceCapabilities capabilities,
+        byte ledNumber,
+        Color color)
     {
-        // Legacy O2/O2C lighting command: write, LED, static RGB mode, event,
-        // command length, R, G, B, interval.
-        SendCommand(stream, device, 7, [1, ledNumber, 0, 0, 0, color.R, color.G, color.B, 0]);
+        if (capabilities.Advertises(LightingV2Command))
+        {
+            // O2 Lighting v2 API: write, LED profile, static mode, color source,
+            // speed, event, R, G, B, on-time, off-time, color-table index.
+            SendCommand(
+                stream,
+                device,
+                LightingV2Command,
+                [1, ledNumber, 0, 0, 0, 0, color.R, color.G, color.B, 0, 0, 0]);
+            return;
+        }
+
+        if (capabilities.Supports(LegacyLightingCommand))
+        {
+            // Legacy O2/O2C lighting command: write, LED, static RGB mode, event,
+            // command length, R, G, B, interval.
+            SendCommand(
+                stream,
+                device,
+                LegacyLightingCommand,
+                [1, ledNumber, 0, 0, 0, color.R, color.G, color.B, 0]);
+            return;
+        }
+
+        throw new IOException("This SayoDevice firmware does not advertise a supported RGB lighting command.");
     }
 
     private static byte[] SendCommand(HidStream stream, HidDevice device, byte command, ReadOnlySpan<byte> payload)
@@ -223,7 +285,18 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
 
         byte[] response = new byte[device.GetMaxInputReportLength()];
         int count = stream.Read(response);
-        if (count < 3 || response[1] != 0)
+        if (count < 4 || response[0] != 2)
+        {
+            throw new IOException($"SayoDevice returned an invalid response to command {command}.");
+        }
+
+        int responseTrailerIndex = response[2] + 3;
+        if (responseTrailerIndex >= count)
+        {
+            throw new IOException($"SayoDevice returned a truncated response to command {command}.");
+        }
+
+        if (response[1] != 0)
         {
             throw new IOException($"SayoDevice rejected command {command}.");
         }
@@ -277,7 +350,38 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
         _keysConfigured = false;
         _unavailableLogged = false;
         _errorLogged = false;
+        _deviceName = null;
     }
 
     public void Dispose() => Reset();
+
+    private sealed class DeviceCapabilities
+    {
+        private readonly HashSet<byte>? _supportedCommands;
+
+        private DeviceCapabilities(HashSet<byte>? supportedCommands)
+        {
+            _supportedCommands = supportedCommands;
+        }
+
+        public bool Supports(byte command) => _supportedCommands?.Contains(command) ?? true;
+
+        public bool Advertises(byte command) => _supportedCommands?.Contains(command) == true;
+
+        public static DeviceCapabilities FromInitializeResponse(byte[] response)
+        {
+            int dataLength = response[2];
+            if (dataLength <= 8)
+            {
+                // Older firmware did not publish capabilities and used the legacy commands.
+                return new DeviceCapabilities(null);
+            }
+
+            HashSet<byte> supportedCommands = response
+                .AsSpan(11, dataLength - 8)
+                .ToArray()
+                .ToHashSet();
+            return new DeviceCapabilities(supportedCommands);
+        }
+    }
 }

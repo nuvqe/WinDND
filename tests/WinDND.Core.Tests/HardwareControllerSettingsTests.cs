@@ -18,7 +18,7 @@ public sealed class HardwareControllerSettingsTests
         Assert.AreEqual(HardwareIndicator.Microphone, settings.RightIndicator);
         Assert.AreEqual("#FF0000", settings.MutedColor);
         Assert.AreEqual("#0000FF", settings.UnmutedColor);
-        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003 }, settings.ProductIds);
+        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003, 0x000C }, settings.ProductIds);
     }
 
     [TestMethod]
@@ -29,7 +29,7 @@ public sealed class HardwareControllerSettingsTests
 
         clone.Hardware.ProductIds.Add(0x0009);
 
-        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003 }, original.Hardware.ProductIds);
-        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003, 0x0009 }, clone.Hardware.ProductIds);
+        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003, 0x000C }, original.Hardware.ProductIds);
+        CollectionAssert.AreEqual(new[] { 0x0002, 0x0003, 0x000C, 0x0009 }, clone.Hardware.ProductIds);
     }
 }

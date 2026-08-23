@@ -1,13 +1,13 @@
 # Hardware validation checklist
 
-The current SayoDevice O2/O2C-compatible controller support was implemented from the published legacy HID protocol. Validate each physical device before relying on its LED state during a call.
+SayoDevice O2/O2C-compatible controller support uses the vendor's published HID protocol. WinDND supports both legacy lighting and Lighting v2; O2L RGB V2 firmware 1.2.38 has been protocol-tested on physical hardware. Validate your complete audio setup before relying on its LED state during a call.
 
 ## Expected defaults
 
 | Item | Default |
 | --- | --- |
 | USB vendor ID | `8089` |
-| USB product IDs | `0002`, `0003` |
+| USB product IDs | `0002`, `0003`, `000C` |
 | Left key | `F13`, toggle all active microphones |
 | Right key | `F14`, toggle output sound |
 | Both indicators | Microphone state |

@@ -181,7 +181,7 @@ internal sealed class SettingsForm : Form
         {
             AutoSize = true,
             MaximumSize = new Size(880, 0),
-            Text = "Best-effort support for SayoDevice O2/O2C keypads. F13 toggles the left action; F14 toggles the right action.",
+            Text = "Supports SayoDevice O2/O2C keypads, including O2L RGB V2. F13 toggles the left action; F14 toggles the right action.",
             ForeColor = SystemColors.GrayText,
             Margin = new Padding(0, 0, 0, 10)
         };

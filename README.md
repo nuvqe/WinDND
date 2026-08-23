@@ -17,7 +17,7 @@
 WinDND (Windows Do Not Disturb) is a lightweight tray application that controls every active Windows audio endpoint. It can mute, unmute, or set output volume on cron schedules, and it can turn a compatible two-button USB keypad into a visible microphone safety switch.
 
 > [!IMPORTANT]
-> USB keypad support is an initial, best-effort implementation based on the published SayoDevice O2/O2C protocol. It has not yet been verified with physical hardware. Do not rely on its indicator during a call until you have completed the [hardware validation checklist](docs/hardware-validation.md).
+> USB keypad support uses the published SayoDevice O2/O2C protocol. The O2L RGB V2 with firmware 1.2.38 has been protocol-tested on physical hardware. Complete the [hardware validation checklist](docs/hardware-validation.md) before relying on its indicator during a call.
 
 | Scheduled audio rules | USB controller settings |
 | --- | --- |
@@ -71,7 +71,7 @@ Settings validates every expression and shows a human-readable explanation. If s
 
 ## USB safe-button controller
 
-The **Hardware controller** tab provides configurable support for SayoDevice O2/O2C-compatible two-key USB keypads. Hardware control is disabled by default.
+The **Hardware controller** tab provides configurable support for SayoDevice O2/O2C-compatible two-key USB keypads, including the O2L RGB V2. Hardware control is disabled by default.
 
 | Default control | Behavior |
 | --- | --- |
@@ -79,7 +79,7 @@ The **Hardware controller** tab provides configurable support for SayoDevice O2/
 | Right button / `F14` | Toggle all output sound. |
 | Both RGB indicators | Red when every selected microphone is muted; blue otherwise. |
 
-Button actions, indicators, RGB colors, microphone scope, USB vendor/product IDs, and automatic key programming are configurable. The initial profile targets vendor ID `8089` and product IDs `0002` and `0003`.
+Button actions, indicators, RGB colors, microphone scope, USB vendor/product IDs, and automatic key programming are configurable. The initial profile targets vendor ID `8089` and product IDs `0002`, `0003`, and `000C`.
 
 Complete the [hardware validation checklist](docs/hardware-validation.md) when testing a new keypad. RGB behavior and onboard programming are vendor-specific.
 

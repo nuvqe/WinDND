@@ -22,7 +22,7 @@ public sealed class HardwareControllerSettings
 
     public int VendorId { get; set; } = 0x8089;
 
-    public List<int> ProductIds { get; set; } = [0x0002, 0x0003];
+    public List<int> ProductIds { get; set; } = [0x0002, 0x0003, 0x000C];
 
     public HardwareControllerSettings Clone() => new()
     {

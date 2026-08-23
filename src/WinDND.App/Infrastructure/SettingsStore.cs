@@ -38,7 +38,14 @@ internal sealed class SettingsStore
             AppSettings settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
             settings.Rules ??= [];
             settings.Hardware ??= new HardwareControllerSettings();
-            settings.Hardware.ProductIds ??= [0x0002, 0x0003];
+            settings.Hardware.ProductIds ??= [0x0002, 0x0003, 0x000C];
+            if (settings.Hardware.VendorId == 0x8089 &&
+                settings.Hardware.ProductIds.SequenceEqual([0x0002, 0x0003]))
+            {
+                // Add the O2L RGB V2 PID only when the user still has the old defaults.
+                // Custom allowlists remain untouched.
+                settings.Hardware.ProductIds.Add(0x000C);
+            }
             return settings;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
