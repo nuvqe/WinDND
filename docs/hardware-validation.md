@@ -1,6 +1,6 @@
 # Hardware validation checklist
 
-SayoDevice O2/O2C-compatible controller support uses the vendor's published HID protocol. WinDND supports both legacy lighting and Lighting v2; O2L RGB V2 firmware 1.2.38 has been protocol-tested on physical hardware. Validate your complete audio setup before relying on its LED state during a call.
+SayoDevice O2/O2C-compatible controller support uses the vendor's published HID protocol. WinDND supports both legacy lighting and Lighting v2; O2L RGB V2 firmware 1.2.38 has been physically verified with working keys and RGB state indicators. Validate your complete audio setup before relying on its LED state during a call.
 
 ## Expected defaults
 
@@ -57,13 +57,8 @@ Do not treat the LED as a safety indicator until all relevant microphones have p
 
 Open a [hardware compatibility report](https://github.com/nuvqe/WinDND/issues/new?template=hardware_compatibility.yml) with those results.
 
-## Demo media shot list
+## Demonstration media
 
-Once the hardware is validated, capture a short, silent loop that shows:
-
-1. The keypad and Windows microphone settings in the same frame.
-2. A left-button press changing every microphone to muted and both LEDs to red.
-3. A second press restoring microphones and changing both LEDs to blue.
-4. A right-button press muting and restoring output sound.
-
-Prefer a 16:9 MP4 source and export a small, readable GIF for the README. Avoid rapid cuts or flashing. Put final files at `docs/assets/windnd-demo.gif` and `docs/assets/windnd-demo.mp4`; then replace the README screenshot table with the GIF and link the MP4 as the full demonstration.
+- [Animated hardware demonstration](assets/windnd-demo.gif)
+- [Original MP4 demonstration](assets/windnd-demo.mp4)
+- [O2L RGB V2 hardware photo](assets/windnd-hardware.png)

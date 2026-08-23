@@ -17,7 +17,12 @@
 WinDND (Windows Do Not Disturb) is a lightweight tray application that controls every active Windows audio endpoint. It can mute, unmute, or set output volume on cron schedules, and it can turn a compatible two-button USB keypad into a visible microphone safety switch.
 
 > [!IMPORTANT]
-> USB keypad support uses the published SayoDevice O2/O2C protocol. The O2L RGB V2 with firmware 1.2.38 has been protocol-tested on physical hardware. Complete the [hardware validation checklist](docs/hardware-validation.md) before relying on its indicator during a call.
+> USB keypad support uses the published SayoDevice O2/O2C protocol. The O2L RGB V2 with firmware 1.2.38 has been physically verified: both keys and the red/blue RGB indicators work reliably with WinDND. Complete the [hardware validation checklist](docs/hardware-validation.md) before relying on its indicator during a call.
+
+<p align="center">
+  <a href="docs/assets/windnd-demo.mp4"><img src="docs/assets/windnd-demo.gif" width="400" alt="WinDND physical keypad toggling Windows microphone mute with blue and red RGB indicators"></a>
+</p>
+<p align="center"><em>Left key: microphone mute. Right key: output mute. Click the animation for the original MP4.</em></p>
 
 | Scheduled audio rules | USB controller settings |
 | --- | --- |
@@ -72,6 +77,8 @@ Settings validates every expression and shows a human-readable explanation. If s
 ## USB safe-button controller
 
 The **Hardware controller** tab provides configurable support for SayoDevice O2/O2C-compatible two-key USB keypads, including the O2L RGB V2. Hardware control is disabled by default.
+
+<p align="center"><img src="docs/assets/windnd-hardware.png" width="420" alt="SayoDevice O2L RGB V2 two-key controller working with WinDND"></p>
 
 | Default control | Behavior |
 | --- | --- |
