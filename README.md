@@ -90,11 +90,13 @@ F13/F14 routing is also configurable:
 
 | Key routing | Result |
 | --- | --- |
-| **WinDND only** | Process the button locally and suppress it before the foreground application receives it. This is the default. |
+| **WinDND only** | Process the button locally and suppress normal foreground delivery. This is the default. |
 | **Foreground application only** | Do not run a WinDND action; pass the original key to the focused application or RDP session. |
 | **WinDND and foreground application** | Run the WinDND action and also pass the original key to the focused application or RDP session. |
 
 Button actions, indicators, RGB colors, microphone scope, key routing, USB vendor/product IDs, and automatic key programming are configurable. The initial profile targets vendor ID `8089` and product IDs `0002`, `0003`, and `000C`.
+
+WinDND combines Windows Raw Input with a foreground-aware keyboard hook so configured actions continue to run while an RDP client or another application has focus. Key suppression is best effort because some remote-access clients capture physical keyboard input before ordinary desktop hooks; such a client might still receive the otherwise harmless F13/F14 key even in **WinDND only** mode.
 
 WinDND synchronizes both indicators with the current audio state when it starts and turns both indicators off during a graceful exit or when the hardware controller is disabled.
 

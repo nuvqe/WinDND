@@ -4,6 +4,7 @@ Notable user-facing changes to WinDND are recorded here.
 
 ## Unreleased
 
+- Fixed safe-button actions while an RDP or other foreground application owns keyboard input by combining Windows Raw Input with a foreground-aware local hook and deduplicating reports from multiple keyboard collections.
 - Synchronized the controller RGB indicators at startup and turned both indicators off during graceful application shutdown.
 - Added configurable F13/F14 routing to process safe-button presses in WinDND, pass them to the foreground application or RDP session, or do both.
 - Added physical O2L RGB V2 demonstration media and confirmed reliable key and RGB behavior.

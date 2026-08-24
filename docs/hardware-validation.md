@@ -40,7 +40,7 @@ Get-CimInstance Win32_PnPEntity |
 - Press the right button and confirm all active outputs mute and restore their previous levels.
 - Test built-in, USB, Bluetooth, dock, webcam, and virtual audio devices that you actually use.
 - Test while Teams, Zoom, a browser call, or another conferencing application is running.
-- With an RDP window focused, test each key-routing mode: WinDND only, foreground application only, and WinDND plus foreground application.
+- With an RDP window focused, confirm the local action still runs in **WinDND only** and **WinDND and foreground application** modes, and does not run in **Foreground application only** mode.
 - Test after sleep/resume, sign-out/sign-in, reboot, USB disconnect/reconnect, and audio-device hot-plug.
 - Test through the USB hub, dock, or KVM used in normal operation.
 - Confirm **Exit** stops button handling and turns off both RGB indicators.
