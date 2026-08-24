@@ -6,7 +6,7 @@ WinDND is designed to operate entirely on the local Windows computer.
 
 - Windows Core Audio endpoint names, volume levels, and mute states.
 - Configured cron rules and hardware-controller preferences.
-- F13 and F14 messages used for the optional two-button controller.
+- F13 and F14 messages used for the optional two-button controller. Depending on the configured key-routing mode, WinDND can suppress them, pass them to the foreground application, or do both.
 - Compatible HID device configuration and RGB state when hardware support is enabled.
 
 WinDND changes endpoint volume and mute state. It does not open an audio capture stream, record microphone audio, inspect call content, or store keystrokes.

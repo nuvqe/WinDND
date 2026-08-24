@@ -8,6 +8,7 @@ SayoDevice O2/O2C-compatible controller support uses the vendor's published HID 
 | --- | --- |
 | USB vendor ID | `8089` |
 | USB product IDs | `0002`, `0003`, `000C` |
+| F13/F14 key routing | WinDND only |
 | Left key | `F13`, toggle all active microphones |
 | Right key | `F14`, toggle output sound |
 | Both indicators | Microphone state |
@@ -39,9 +40,11 @@ Get-CimInstance Win32_PnPEntity |
 - Press the right button and confirm all active outputs mute and restore their previous levels.
 - Test built-in, USB, Bluetooth, dock, webcam, and virtual audio devices that you actually use.
 - Test while Teams, Zoom, a browser call, or another conferencing application is running.
+- With an RDP window focused, test each key-routing mode: WinDND only, foreground application only, and WinDND plus foreground application.
 - Test after sleep/resume, sign-out/sign-in, reboot, USB disconnect/reconnect, and audio-device hot-plug.
 - Test through the USB hub, dock, or KVM used in normal operation.
-- Confirm **Exit** stops button handling and that the app starts again at the next sign-in.
+- Confirm **Exit** stops button handling and turns off both RGB indicators.
+- Start WinDND again and confirm both indicators immediately show the current configured audio state.
 
 Do not treat the LED as a safety indicator until all relevant microphones have passed these tests. Conferencing applications can have their own software mute state; WinDND represents the Windows input endpoint state.
 

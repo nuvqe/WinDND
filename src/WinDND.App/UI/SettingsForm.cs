@@ -17,6 +17,7 @@ internal sealed class SettingsForm : Form
     private readonly Label _status = new();
     private readonly CheckBox _hardwareEnabled = new();
     private readonly ComboBox _microphoneScope = new();
+    private readonly ComboBox _keyRouting = new();
     private readonly ComboBox _leftAction = new();
     private readonly ComboBox _rightAction = new();
     private readonly ComboBox _leftIndicator = new();
@@ -181,7 +182,7 @@ internal sealed class SettingsForm : Form
         {
             AutoSize = true,
             MaximumSize = new Size(880, 0),
-            Text = "Supports SayoDevice O2/O2C keypads, including O2L RGB V2. F13 toggles the left action; F14 toggles the right action.",
+            Text = "Supports SayoDevice O2/O2C keypads, including O2L RGB V2. F13 controls the left action; F14 controls the right action.",
             ForeColor = SystemColors.GrayText,
             Margin = new Padding(0, 0, 0, 10)
         };
@@ -195,22 +196,28 @@ internal sealed class SettingsForm : Form
             Padding = new Padding(10),
             Margin = new Padding(0, 0, 0, 10)
         };
-        TableLayoutPanel behavior = CreateSettingsTable(5);
+        TableLayoutPanel behavior = CreateSettingsTable(6);
         ConfigureDropDown(_microphoneScope, "All active input devices", "Default communications input");
+        ConfigureDropDown(
+            _keyRouting,
+            "WinDND only",
+            "Foreground application only",
+            "WinDND and foreground application");
         ConfigureDropDown(_leftAction, "Toggle microphone", "Toggle output sound", "None");
         ConfigureDropDown(_rightAction, "Toggle microphone", "Toggle output sound", "None");
         ConfigureDropDown(_leftIndicator, "Microphone state", "Output-sound state", "Off");
         ConfigureDropDown(_rightIndicator, "Microphone state", "Output-sound state", "Off");
         AddSettingRow(behavior, 0, "Microphone scope", _microphoneScope);
+        AddSettingRow(behavior, 1, "F13/F14 key routing", _keyRouting);
 
         TableLayoutPanel buttonHeaders = new() { AutoSize = true, Dock = DockStyle.Fill, ColumnCount = 2 };
         buttonHeaders.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         buttonHeaders.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         buttonHeaders.Controls.Add(new Label { Text = "Action", AutoSize = true }, 0, 0);
         buttonHeaders.Controls.Add(new Label { Text = "Indicator", AutoSize = true }, 1, 0);
-        AddSettingRow(behavior, 1, "", buttonHeaders);
-        AddButtonBehaviorRow(behavior, 2, "Left button (F13)", _leftAction, _leftIndicator);
-        AddButtonBehaviorRow(behavior, 3, "Right button (F14)", _rightAction, _rightIndicator);
+        AddSettingRow(behavior, 2, "", buttonHeaders);
+        AddButtonBehaviorRow(behavior, 3, "Left button (F13)", _leftAction, _leftIndicator);
+        AddButtonBehaviorRow(behavior, 4, "Right button (F14)", _rightAction, _rightIndicator);
 
         TableLayoutPanel colors = new() { AutoSize = true, Dock = DockStyle.Fill, ColumnCount = 4 };
         colors.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -223,7 +230,7 @@ internal sealed class SettingsForm : Form
         colors.Controls.Add(_mutedColor, 1, 0);
         colors.Controls.Add(new Label { Text = "Unmuted", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(12, 3, 3, 3) }, 2, 0);
         colors.Controls.Add(_unmutedColor, 3, 0);
-        AddSettingRow(behavior, 4, "RGB colors (#RRGGBB)", colors);
+        AddSettingRow(behavior, 5, "RGB colors (#RRGGBB)", colors);
         behaviorGroup.Controls.Add(behavior);
         root.Controls.Add(behaviorGroup, 0, 2);
 
@@ -361,6 +368,7 @@ internal sealed class SettingsForm : Form
         HardwareControllerSettings hardware = settings.Hardware;
         _hardwareEnabled.Checked = hardware.Enabled;
         _microphoneScope.SelectedIndex = hardware.MicrophoneScope == MicrophoneScope.AllActive ? 0 : 1;
+        _keyRouting.SelectedIndex = ToKeyRoutingIndex(hardware.KeyRouting);
         _leftAction.SelectedIndex = ToActionIndex(hardware.LeftButtonAction);
         _rightAction.SelectedIndex = ToActionIndex(hardware.RightButtonAction);
         _leftIndicator.SelectedIndex = ToIndicatorIndex(hardware.LeftIndicator);
@@ -489,6 +497,7 @@ internal sealed class SettingsForm : Form
             MicrophoneScope = _microphoneScope.SelectedIndex == 0
                 ? MicrophoneScope.AllActive
                 : MicrophoneScope.DefaultCommunications,
+            KeyRouting = FromKeyRoutingIndex(_keyRouting.SelectedIndex),
             LeftButtonAction = FromActionIndex(_leftAction.SelectedIndex),
             RightButtonAction = FromActionIndex(_rightAction.SelectedIndex),
             LeftIndicator = FromIndicatorIndex(_leftIndicator.SelectedIndex),
@@ -530,6 +539,21 @@ internal sealed class SettingsForm : Form
         0 => HardwareButtonAction.ToggleMicrophone,
         1 => HardwareButtonAction.ToggleOutput,
         _ => HardwareButtonAction.None
+    };
+
+    private static int ToKeyRoutingIndex(HardwareKeyRouting routing) => routing switch
+    {
+        HardwareKeyRouting.WinDndOnly => 0,
+        HardwareKeyRouting.ForegroundApplicationOnly => 1,
+        HardwareKeyRouting.WinDndAndForegroundApplication => 2,
+        _ => 0
+    };
+
+    private static HardwareKeyRouting FromKeyRoutingIndex(int index) => index switch
+    {
+        1 => HardwareKeyRouting.ForegroundApplicationOnly,
+        2 => HardwareKeyRouting.WinDndAndForegroundApplication,
+        _ => HardwareKeyRouting.WinDndOnly
     };
 
     private static int ToIndicatorIndex(HardwareIndicator indicator) => indicator switch

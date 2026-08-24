@@ -25,9 +25,11 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
     private DateTime _nextHealthCheckUtc;
     private Color? _lastLeftColor;
     private Color? _lastRightColor;
+    private HardwareControllerSettings? _activeSettings;
     private bool _keysConfigured;
     private bool _unavailableLogged;
     private bool _errorLogged;
+    private bool _disposed;
     private string? _deviceName;
 
     public bool IsConnected => _devicePath is not null;
@@ -44,6 +46,7 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
     {
         if (!settings.Enabled)
         {
+            TurnOff();
             Reset();
             return;
         }
@@ -53,6 +56,7 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
         {
             Reset();
             _settingsKey = settingsKey;
+            _activeSettings = settings.Clone();
             force = true;
         }
 
@@ -167,6 +171,37 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
                 _logger.Error("The SayoDevice hardware controller could not be updated.", ex, 2500);
                 _errorLogged = true;
             }
+        }
+    }
+
+    private void TurnOff()
+    {
+        if (_activeSettings is null)
+        {
+            return;
+        }
+
+        try
+        {
+            HidDevice? device = FindDevice(_activeSettings);
+            if (device is null)
+            {
+                return;
+            }
+
+            using HidStream stream = device.Open();
+            stream.ReadTimeout = 750;
+            stream.WriteTimeout = 750;
+            DeviceCapabilities capabilities = Initialize(stream, device);
+            SetStaticColor(stream, device, capabilities, LeftLed, Color.Black);
+            SetStaticColor(stream, device, capabilities, RightLed, Color.Black);
+            _lastLeftColor = Color.Black;
+            _lastRightColor = Color.Black;
+            _logger.Information("SayoDevice RGB indicators were turned off.", 1503);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or TimeoutException)
+        {
+            _logger.Error("The SayoDevice RGB indicators could not be turned off.", ex, 2502);
         }
     }
 
@@ -347,13 +382,24 @@ internal sealed class SayoO2Controller(IAppLogger logger) : IDisposable
         _nextHealthCheckUtc = DateTime.MinValue;
         _lastLeftColor = null;
         _lastRightColor = null;
+        _activeSettings = null;
         _keysConfigured = false;
         _unavailableLogged = false;
         _errorLogged = false;
         _deviceName = null;
     }
 
-    public void Dispose() => Reset();
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        TurnOff();
+        Reset();
+    }
 
     private sealed class DeviceCapabilities
     {

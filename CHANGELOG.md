@@ -4,6 +4,8 @@ Notable user-facing changes to WinDND are recorded here.
 
 ## Unreleased
 
+- Synchronized the controller RGB indicators at startup and turned both indicators off during graceful application shutdown.
+- Added configurable F13/F14 routing to process safe-button presses in WinDND, pass them to the foreground application or RDP session, or do both.
 - Added physical O2L RGB V2 demonstration media and confirmed reliable key and RGB behavior.
 - Added physical-device support for SayoDevice O2L RGB V2 (PID `000C`), including Lighting v2 RGB control.
 - Improved SayoDevice discovery by selecting its vendor control interface and honoring firmware capabilities.

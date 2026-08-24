@@ -6,6 +6,8 @@ public sealed class HardwareControllerSettings
 
     public MicrophoneScope MicrophoneScope { get; set; } = MicrophoneScope.AllActive;
 
+    public HardwareKeyRouting KeyRouting { get; set; } = HardwareKeyRouting.WinDndOnly;
+
     public HardwareButtonAction LeftButtonAction { get; set; } = HardwareButtonAction.ToggleMicrophone;
 
     public HardwareButtonAction RightButtonAction { get; set; } = HardwareButtonAction.ToggleOutput;
@@ -28,6 +30,7 @@ public sealed class HardwareControllerSettings
     {
         Enabled = Enabled,
         MicrophoneScope = MicrophoneScope,
+        KeyRouting = KeyRouting,
         LeftButtonAction = LeftButtonAction,
         RightButtonAction = RightButtonAction,
         LeftIndicator = LeftIndicator,
@@ -44,6 +47,13 @@ public enum MicrophoneScope
 {
     AllActive,
     DefaultCommunications
+}
+
+public enum HardwareKeyRouting
+{
+    WinDndOnly,
+    ForegroundApplicationOnly,
+    WinDndAndForegroundApplication
 }
 
 public enum HardwareButtonAction
