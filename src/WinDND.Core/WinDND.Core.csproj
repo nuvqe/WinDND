@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CronExpressionDescriptor" Version="2.51.0" />
+    <PackageReference Include="CronExpressionDescriptor" Version="3.2.0" />
     <PackageReference Include="Cronos" Version="0.13.0" />
   </ItemGroup>
 </Project>
