@@ -4,9 +4,9 @@
     "net10.0": {
       "CronExpressionDescriptor": {
         "type": "Direct",
-        "requested": "[2.51.0, )",
-        "resolved": "2.51.0",
-        "contentHash": "HL9DICwTMJBbGcQSQxDp0WmsrH5YOPWFRnAcGXnsFwKOy+7lHcXLQLU4urSNrVkIhySdtmdk4utsWmZ6FJ6flA=="
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "5Gv7GgpyL2kNNFaimjbBfjRmSK93NP1fpZuHp1M47aHanCmGTxPwTXaF0Cr/bbVsHgvHRcYQtPcGgr7OAZnl6g=="
       },
       "Cronos": {
         "type": "Direct",
